@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="http://libs.baidu.com/jquery/2.1.4/jquery.min.js"></script>
+</head>
+<style>
+
+
+    .clearfix {
+        zoom: 1;
+    }
+
+    .clearfix:after {
+        display: block;
+        content: '';
+        clear: both;
+        height: 0;
+        visibility: hidden;
+    }
+
+    .header, .footer {
+        height: 70px;
+        text-align: center;
+    }
+
+    .content {
+        margin: 0 auto;
+        width: 1000px;
+    }
+
+    .side {
+        float: left;
+        height: 500px;
+        width: 280px;
+    }
+
+    .main {
+        float: right;
+        height: 500px;
+        width: 700px;
+    }
+
+</style>
+<body>
+
+<div class="content clearfix">
+    <div class="side">
+        <p>聊天列表</p>
+        <!--  <div style="width: 100px;height: 200px;outline: 1px darkkhaki solid;"></div>-->
+        <div id="ownerchatList" style="width: 200px;height: 300px;border: 1px solid black">
+        </div>
+    </div>
+    <div class="main">
+
+
+        <div style="overflow-y:auto; overflow-x:auto; width:400px; height:400px;outline: 1px darkkhaki solid;margin-top: 20px"
+             id="message">
+
+        </div>
+        <div style="width: 450px;height: 30px;">
+            <div style="width: 450px;height: 30px;">
+                <input type="text" id="text" style="width: 397px;height: 25px" name="text"/>
+                <button onclick="send()" id="btnAdd" >发送</button>
+
+            </div>
+        </div>
+
+        <div></div>
+    </div>
+
+    <table>
+        <tbody id="tbody"></tbody>
+    </table>
+</div>
+<div class="footer">
+    <p>消息提醒</p>
+    <div id="tixing" style="width: 350px;height: 150px;border: 1px solid black;margin-left: 620px">
+    </div>
+</div>
+
+
+<script>
+    var websocket = null;
+    var name = 'bb'
+    var passwords = '123456'
+    var serverPaths = 'localhost:8080'
+    window.onload = conectWebSocket()
+    //连接对象.
+
+
+
+    function conectWebSocket() {
+        //判断当前的浏览器是否支持websocket.
+        if ("WebSocket" in window) {
+            url = "ws://" + serverPaths + "/websocket/" + name + "/" + passwords;
+            websocket = new WebSocket(url);
+        } else {
+            alert("Not support websocket");
+            return false;
+        }
+        //连接成功的方法.
+        websocket.onopen = function (event) {
+            setMessgeHtml("Loc MSG:连接成功");
+        }
+
+        //连接关闭.
+        websocket.onclose = function (event) {
+            setMessgeHtml("Loc MSG:连接关闭");
+        }
+
+        //连接异常.
+        websocket.onerror = function (event) {
+            setMessgeHtml("Loc MSG:连接异常");
+        }
+        websocket.onmessage = function (event) {
+            setMessgeHtml(event.data);
+        }
+    }
+
+    function closeWebSocket() {
+        this.websocket.close();
+    }
+
+    function setMessgeHtml(msg) {
+        var message = document.getElementById("message");
+        message.innerHTML += msg + "<br/>";
+    }
+
+    /**
+     发送消息.
+     */
+    function send(){
+        var message = document.getElementById("text").value;
+
+        var socketMsg = {'msg':message ,'type':"text","key":"用户标志"}
+
+        websocket.send(JSON.stringify(socketMsg));//将json对象转换为json字符串.
+        $("#text").val("");
+        setMessgeHtml(message);
+    }
+</script>
+</body>
+</html>
